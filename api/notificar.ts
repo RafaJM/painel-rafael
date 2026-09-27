@@ -47,7 +47,16 @@ function chavesVapidCombinam(privada: string): boolean {
   }
 }
 
-const plural =(n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`
+/** Papel de uma chave legada em formato JWT (anon / service_role). */
+function papelDoJwt(chave: string): string | null {
+  try {
+    return JSON.parse(Buffer.from(chave.split('.')[1], 'base64url').toString()).role ?? null
+  } catch {
+    return null
+  }
+}
+
+const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`
 
 async function montarBriefing(db: SupabaseClient, userId: string, hoje: string): Promise<Mensagem> {
   const [agendas, rotina, ...tarefas] = await Promise.all([
