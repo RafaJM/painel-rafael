@@ -72,5 +72,8 @@ export async function testarPush(tipo: 'briefing' | 'revisao'): Promise<string> 
   })
   const corpo = await resp.json().catch(() => ({}))
   if (!resp.ok) throw new Error(corpo.erro ?? `HTTP ${resp.status}`)
-  return corpo.enviadas ? `Enviada para ${corpo.enviadas} aparelho(s).` : 'Nenhum aparelho inscrito recebeu.'
+  if (corpo.enviadas) return `Enviada para ${corpo.enviadas} aparelho(s).`
+  if (!corpo.inscritos) return 'Nenhuma inscrição sua encontrada no banco. Desligue e ative de novo neste aparelho.'
+  if (corpo.removidas) return 'A inscrição deste aparelho tinha expirado e foi removida. Ative de novo.'
+  return `O envio falhou: ${(corpo.falhas ?? []).join(' | ') || 'motivo desconhecido'}`
 }

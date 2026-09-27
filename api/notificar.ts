@@ -1,6 +1,7 @@
 // Função de servidor da Vercel: POST /api/notificar?tipo=briefing|revisao
 // Chamada pelo pg_cron do Supabase às 04:30 e 19:30 (header x-segredo),
 // ou pelo botão de teste do app (header Authorization com o login do usuário).
+import { createECDH } from 'node:crypto'
 import webpush from 'web-push'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { eventosDasAgendas, hojeSP } from './_lib/ical.js'
@@ -35,7 +36,18 @@ function inicioSemana(dia: string): string {
   return d.toISOString().slice(0, 10)
 }
 
-const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`
+/** A chave privada gera a chave pública usada pelo app? */
+function chavesVapidCombinam(privada: string): boolean {
+  try {
+    const ecdh = createECDH('prime256v1')
+    ecdh.setPrivateKey(Buffer.from(privada.trim(), 'base64url'))
+    return ecdh.getPublicKey().toString('base64url') === VAPID_PUBLICA
+  } catch {
+    return false
+  }
+}
+
+const plural =(n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`
 
 async function montarBriefing(db: SupabaseClient, userId: string, hoje: string): Promise<Mensagem> {
   const [agendas, rotina, ...tarefas] = await Promise.all([
@@ -123,6 +135,13 @@ export async function POST(request: Request): Promise<Response> {
   )
   if (faltando.length) return json({ erro: `Variáveis faltando na Vercel: ${faltando.join(', ')}` }, 500)
 
+  if (!chavesVapidCombinam(process.env.VAPID_PRIVATE_KEY!)) {
+    return json(
+      { erro: 'VAPID_PRIVATE_KEY na Vercel não corresponde à chave pública do app (confira se não trocou com o NOTIFICAR_SEGREDO)' },
+      500,
+    )
+  }
+
   const tipo = new URL(request.url).searchParams.get('tipo') as Tipo | null
   if (tipo !== 'briefing' && tipo !== 'revisao') return json({ erro: 'tipo deve ser briefing ou revisao' }, 400)
 
@@ -144,14 +163,17 @@ export async function POST(request: Request): Promise<Response> {
     usuarios = [data.user.id]
   } else return json({ erro: 'Não autenticado' }, 401)
 
-  webpush.setVapidDetails('https://painel-rafael-pi.vercel.app', VAPID_PUBLICA, process.env.VAPID_PRIVATE_KEY!)
+  webpush.setVapidDetails('https://painel-rafael-pi.vercel.app', VAPID_PUBLICA, process.env.VAPID_PRIVATE_KEY!.trim())
   const hoje = hojeSP()
   let enviadas = 0
   let removidas = 0
+  let inscritos = 0
+  const falhas: string[] = []
 
   for (const userId of usuarios) {
     const msg = tipo === 'briefing' ? await montarBriefing(db, userId, hoje) : await montarRevisao(db, userId, hoje)
     const { data: inscricoes } = await db.from('push_inscricoes').select('id, endpoint, p256dh, auth').eq('user_id', userId)
+    inscritos += inscricoes?.length ?? 0
     for (const s of inscricoes ?? []) {
       try {
         await webpush.sendNotification(
@@ -166,10 +188,13 @@ export async function POST(request: Request): Promise<Response> {
           // Inscrição expirou (app desinstalado, permissão revogada)
           await db.from('push_inscricoes').delete().eq('id', s.id)
           removidas++
+        } else {
+          const corpo = (e as { body?: string }).body ?? (e as Error).message
+          falhas.push(`${status ?? 'erro'}: ${String(corpo).slice(0, 200)}`)
         }
       }
     }
   }
 
-  return json({ enviadas, removidas })
+  return json({ inscritos, enviadas, removidas, falhas })
 }
