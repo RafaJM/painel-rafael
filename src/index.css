@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fundo: #0b1220;
+  --color-cartao: #121b2e;
+  --color-borda: #1f2a40;
+  --color-destaque: #2dd4bf;
+}
+
+:root {
+  color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-fundo);
+  color: #e2e8f0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overscroll-behavior-y: none;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px; /* evita zoom automático no Android/iOS */
+}
