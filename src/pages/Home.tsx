@@ -1,12 +1,13 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarDays, CircleCheck, Circle } from 'lucide-react'
+import { CircleCheck, Circle } from 'lucide-react'
 import { useTabela } from '../lib/useTabela'
 import { useHoje } from '../lib/useHoje'
 import { dataPorExtenso, diaDe, prazoRelativo, saudacao } from '../lib/datas'
 import { agrupar } from '../lib/graficos'
 import { sincronizarRotina, useSerieRotina, type RegistroHabito } from '../lib/rotina'
 import MiniBarras from '../components/MiniBarras'
+import AgendaDoDia from '../components/AgendaDoDia'
 import { PAINEIS, prioridadesDoDia, resumo, type ItemPrioridade, type Tarefa } from '../lib/tarefas'
 import BarraProgresso from '../components/BarraProgresso'
 
@@ -50,6 +51,8 @@ export default function Home() {
         <p className="text-sm capitalize text-slate-400">{dataPorExtenso(hoje)}</p>
         <h1 className="text-2xl font-semibold">{saudacao()}, Rafael</h1>
       </header>
+
+      <AgendaDoDia hoje={hoje} />
 
       <section className="rounded-2xl border border-borda bg-cartao p-4">
         <div className="mb-3 flex items-baseline justify-between">
@@ -105,12 +108,6 @@ export default function Home() {
         <MiniBarras barras={rotina7} />
         <p className="mt-1.5 text-xs text-slate-500">Últimos 7 dias</p>
       </Link>
-
-      <section className="rounded-2xl border border-dashed border-borda p-4 text-sm text-slate-500">
-        <div className="flex items-center gap-2">
-          <CalendarDays size={18} /> Agenda do dia — chega na etapa 4
-        </div>
-      </section>
 
       <section className="grid gap-3 sm:grid-cols-3">
         {PAINEIS.map((painel, i) => {

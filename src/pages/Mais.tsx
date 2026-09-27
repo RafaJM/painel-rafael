@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ChevronRight, LogOut } from 'lucide-react'
+import { CalendarDays, ChevronRight, LogOut } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { MODULOS } from '../modulos'
 
@@ -16,6 +16,14 @@ export default function Mais() {
             <ChevronRight size={18} className="text-slate-600" />
           </Link>
         ))}
+      </div>
+      <h2 className="mt-6 mb-2 px-1 text-sm text-slate-500">Configurações</h2>
+      <div className="overflow-hidden rounded-2xl border border-borda bg-cartao">
+        <Link to="/agendas" className="flex items-center gap-3 px-4 py-3.5">
+          <CalendarDays size={20} className="text-slate-400" />
+          <span className="flex-1">Agendas</span>
+          <ChevronRight size={18} className="text-slate-600" />
+        </Link>
       </div>
       <button
         onClick={() => supabase.auth.signOut()}

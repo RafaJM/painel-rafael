@@ -11,6 +11,7 @@ import PainelTarefas from './pages/PainelTarefas'
 import Mais from './pages/Mais'
 import EmBreve from './pages/EmBreve'
 import Rotina from './pages/Rotina'
+import Agendas from './pages/Agendas'
 
 export default function App() {
   const [sessao, setSessao] = useState<Session | null | undefined>(undefined)
@@ -45,6 +46,7 @@ export default function App() {
             <Route key={m.rota} path={m.rota} element={<EmBreve nome={m.nome} />} />
           ))}
           <Route path="/rotina" element={<Rotina />} />
+          <Route path="/agendas" element={<Agendas />} />
           <Route path="/mais" element={<Mais />} />
           <Route path="*" element={<Home />} />
         </Route>
