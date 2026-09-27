@@ -155,7 +155,8 @@ export async function POST(request: Request): Promise<Response> {
   const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
   if (segredo) {
     if (segredo !== process.env.NOTIFICAR_SEGREDO) return json({ erro: 'Segredo inválido' }, 401)
-    const { data } = await db.from('push_inscricoes').select('user_id')
+    const { data, error } = await db.from('push_inscricoes').select('user_id')
+    if (error) return json({ erro: `Falha ao ler inscrições (confira SUPABASE_SECRET_KEY): ${error.message}` }, 500)
     usuarios = [...new Set((data ?? []).map((r) => r.user_id as string))]
   } else if (token) {
     const { data, error } = await db.auth.getUser(token)
@@ -172,7 +173,11 @@ export async function POST(request: Request): Promise<Response> {
 
   for (const userId of usuarios) {
     const msg = tipo === 'briefing' ? await montarBriefing(db, userId, hoje) : await montarRevisao(db, userId, hoje)
-    const { data: inscricoes } = await db.from('push_inscricoes').select('id, endpoint, p256dh, auth').eq('user_id', userId)
+    const { data: inscricoes, error } = await db
+      .from('push_inscricoes')
+      .select('id, endpoint, p256dh, auth')
+      .eq('user_id', userId)
+    if (error) return json({ erro: `Falha ao ler inscrições (confira SUPABASE_SECRET_KEY): ${error.message}` }, 500)
     inscritos += inscricoes?.length ?? 0
     for (const s of inscricoes ?? []) {
       try {
