@@ -135,6 +135,14 @@ export async function POST(request: Request): Promise<Response> {
   )
   if (faltando.length) return json({ erro: `Variáveis faltando na Vercel: ${faltando.join(', ')}` }, 500)
 
+  const chaveSecreta = process.env.SUPABASE_SECRET_KEY!.trim()
+  if (!chaveSecreta.startsWith('sb_secret_') && !chaveSecreta.startsWith('eyJ')) {
+    return json(
+      { erro: `SUPABASE_SECRET_KEY na Vercel não é uma chave secreta (começa com "${chaveSecreta.slice(0, 10)}…"; deveria começar com "sb_secret_")` },
+      500,
+    )
+  }
+
   if (!chavesVapidCombinam(process.env.VAPID_PRIVATE_KEY!)) {
     return json(
       { erro: 'VAPID_PRIVATE_KEY na Vercel não corresponde à chave pública do app (confira se não trocou com o NOTIFICAR_SEGREDO)' },
@@ -145,7 +153,7 @@ export async function POST(request: Request): Promise<Response> {
   const tipo = new URL(request.url).searchParams.get('tipo') as Tipo | null
   if (tipo !== 'briefing' && tipo !== 'revisao') return json({ erro: 'tipo deve ser briefing ou revisao' }, 400)
 
-  const db = createClient(process.env.VITE_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, {
+  const db = createClient(process.env.VITE_SUPABASE_URL!, chaveSecreta, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 
