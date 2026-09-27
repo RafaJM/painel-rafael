@@ -20,12 +20,18 @@ async function registro(): Promise<ServiceWorkerRegistration | null> {
   return (await navigator.serviceWorker.getRegistration()) ?? null
 }
 
+async function salvaNoBanco(endpoint: string): Promise<boolean> {
+  const { data } = await supabase.from('push_inscricoes').select('id').eq('endpoint', endpoint).maybeSingle()
+  return Boolean(data)
+}
+
+/** "Ativado" só quando o navegador está inscrito E o banco tem o registro. */
 export async function estadoPush(): Promise<EstadoPush> {
   if (!suportaPush()) return 'sem-suporte'
   if (Notification.permission === 'denied') return 'bloqueado'
   const reg = await registro()
   const inscricao = await reg?.pushManager.getSubscription()
-  return inscricao ? 'ativado' : 'desativado'
+  return inscricao && (await salvaNoBanco(inscricao.endpoint)) ? 'ativado' : 'desativado'
 }
 
 export async function ativarPush(): Promise<EstadoPush> {
@@ -49,7 +55,10 @@ export async function ativarPush(): Promise<EstadoPush> {
     },
     { onConflict: 'endpoint' },
   )
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(`Não consegui salvar a inscrição: ${error.message}`)
+  if (!(await salvaNoBanco(inscricao.endpoint))) {
+    throw new Error('A inscrição não apareceu no banco depois de salva. Me envie esta mensagem.')
+  }
   return 'ativado'
 }
 

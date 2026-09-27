@@ -136,7 +136,7 @@ export async function POST(request: Request): Promise<Response> {
   if (faltando.length) return json({ erro: `Variáveis faltando na Vercel: ${faltando.join(', ')}` }, 500)
 
   const chaveSecreta = process.env.SUPABASE_SECRET_KEY!.trim()
-  if (!chaveSecreta.startsWith('sb_secret_') && !chaveSecreta.startsWith('eyJ')) {
+  if (!chaveSecreta.startsWith('sb_secret_') && papelDoJwt(chaveSecreta) !== 'service_role') {
     return json(
       { erro: `SUPABASE_SECRET_KEY na Vercel não é uma chave secreta (começa com "${chaveSecreta.slice(0, 10)}…"; deveria começar com "sb_secret_")` },
       500,
