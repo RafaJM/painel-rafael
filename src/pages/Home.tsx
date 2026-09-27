@@ -8,6 +8,7 @@ import { agrupar } from '../lib/graficos'
 import { sincronizarRotina, useSerieRotina, type RegistroHabito } from '../lib/rotina'
 import MiniBarras from '../components/MiniBarras'
 import AgendaDoDia from '../components/AgendaDoDia'
+import { CartaoErros, CartaoSono } from '../components/CartoesHome'
 import { PAINEIS, prioridadesDoDia, resumo, type ItemPrioridade, type Tarefa } from '../lib/tarefas'
 import BarraProgresso from '../components/BarraProgresso'
 
@@ -105,9 +106,14 @@ export default function Home() {
             {rotinaHoje.pct === null ? '—' : `${rotinaHoje.feitos}/${rotinaHoje.previstos} · ${rotinaHoje.pct}%`}
           </span>
         </div>
-        <MiniBarras barras={rotina7} />
+        <MiniBarras barras={rotina7.map((b) => ({ chave: b.chave, valor: b.pct }))} />
         <p className="mt-1.5 text-xs text-slate-500">Últimos 7 dias</p>
       </Link>
+
+      <section className="grid gap-3 sm:grid-cols-2">
+        <CartaoSono hoje={hoje} />
+        <CartaoErros hoje={hoje} />
+      </section>
 
       <section className="grid gap-3 sm:grid-cols-3">
         {PAINEIS.map((painel, i) => {

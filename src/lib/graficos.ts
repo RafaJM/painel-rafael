@@ -57,11 +57,11 @@ function descrever(chave: string, janela: Janela, hoje: string): Pick<Barra, 'ro
   }
 }
 
-/** Agrupa pontos diários nas barras da janela escolhida, terminando no período atual. */
-export function agrupar(pontos: PontoDia[], janela: Janela, hoje: string): Barra[] {
+/** Chaves dos períodos exibidos, terminando no período atual. */
+function periodos(janela: Janela, hoje: string): string[] {
   const n = QUANTIDADE[janela]
   const atual = chaveDe(hoje, janela)
-  const chaves = Array.from({ length: n }, (_, i) => {
+  return Array.from({ length: n }, (_, i) => {
     const k = n - 1 - i
     return janela === 'dia'
       ? somarDias(atual, -k)
@@ -69,7 +69,11 @@ export function agrupar(pontos: PontoDia[], janela: Janela, hoje: string): Barra
         ? somarDias(atual, -7 * k)
         : somarMeses(atual, -k)
   })
+}
 
+/** Agrupa pontos diários nas barras da janela escolhida, terminando no período atual. */
+export function agrupar(pontos: PontoDia[], janela: Janela, hoje: string): Barra[] {
+  const chaves = periodos(janela, hoje)
   const soma = new Map(chaves.map((c) => [c, { previstos: 0, feitos: 0 }]))
   for (const p of pontos) {
     const s = soma.get(chaveDe(p.data, janela))
@@ -88,5 +92,36 @@ export function agrupar(pontos: PontoDia[], janela: Janela, hoje: string): Barra
       feitos,
       pct: previstos ? Math.round((feitos / previstos) * 100) : null,
     }
+  })
+}
+
+/** Um valor medido num dia (ex.: horas de sono). */
+export interface PontoValor {
+  data: string
+  valor: number
+}
+
+export interface BarraMedia {
+  chave: string
+  rotulo: string
+  detalhe: string
+  n: number // quantos registros no período
+  media: number | null
+}
+
+/** Média dos valores por período (dia / semana / mês). */
+export function agruparMedia(pontos: PontoValor[], janela: Janela, hoje: string): BarraMedia[] {
+  const chaves = periodos(janela, hoje)
+  const soma = new Map(chaves.map((c) => [c, { total: 0, n: 0 }]))
+  for (const p of pontos) {
+    const s = soma.get(chaveDe(p.data, janela))
+    if (s) {
+      s.total += p.valor
+      s.n += 1
+    }
+  }
+  return chaves.map((chave) => {
+    const { total, n } = soma.get(chave)!
+    return { chave, ...descrever(chave, janela, hoje), n, media: n ? total / n : null }
   })
 }

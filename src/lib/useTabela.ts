@@ -18,17 +18,18 @@ function mesclar<T extends ComId>(linhas: T[], nova: T): T[] {
  */
 export function useTabela<T extends ComId>(
   tabela: string,
-  filtro?: { coluna: string; valor: string },
+  filtro?: { coluna: string; valor: string; op?: 'eq' | 'gte' },
 ) {
   const [linhas, setLinhas] = useState<T[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const coluna = filtro?.coluna
   const valor = filtro?.valor
+  const op = filtro?.op ?? 'eq'
 
   const recarregar = useCallback(async () => {
     let consulta = supabase.from(tabela).select('*')
-    if (coluna && valor !== undefined) consulta = consulta.eq(coluna, valor)
+    if (coluna && valor !== undefined) consulta = consulta[op](coluna, valor)
     const { data, error } = await consulta
     if (error) setErro(error.message)
     else {
@@ -36,7 +37,7 @@ export function useTabela<T extends ComId>(
       setLinhas(data as T[])
     }
     setCarregando(false)
-  }, [tabela, coluna, valor])
+  }, [tabela, coluna, valor, op])
 
   useEffect(() => {
     setCarregando(true)
@@ -49,7 +50,7 @@ export function useTabela<T extends ComId>(
           event: '*',
           schema: 'public',
           table: tabela,
-          ...(coluna && valor !== undefined ? { filter: `${coluna}=eq.${valor}` } : {}),
+          ...(coluna && valor !== undefined ? { filter: `${coluna}=${op}.${valor}` } : {}),
         },
         (p) => {
         if (p.eventType === 'DELETE') {
@@ -72,7 +73,7 @@ export function useTabela<T extends ComId>(
       supabase.removeChannel(canal)
       document.removeEventListener('visibilitychange', aoVoltar)
     }
-  }, [tabela, coluna, valor, recarregar])
+  }, [tabela, coluna, valor, op, recarregar])
 
   const inserir = useCallback(
     async (dados: Partial<T>) => {

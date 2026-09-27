@@ -12,6 +12,8 @@ import Mais from './pages/Mais'
 import EmBreve from './pages/EmBreve'
 import Rotina from './pages/Rotina'
 import Agendas from './pages/Agendas'
+import Sono from './pages/Sono'
+import Erros from './pages/Erros'
 
 export default function App() {
   const [sessao, setSessao] = useState<Session | null | undefined>(undefined)
@@ -47,6 +49,8 @@ export default function App() {
           ))}
           <Route path="/rotina" element={<Rotina />} />
           <Route path="/agendas" element={<Agendas />} />
+          <Route path="/sono" element={<Sono />} />
+          <Route path="/erros" element={<Erros />} />
           <Route path="/mais" element={<Mais />} />
           <Route path="*" element={<Home />} />
         </Route>
