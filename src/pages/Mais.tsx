@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { CalendarDays, ChevronRight, LogOut } from 'lucide-react'
+import { Bell, CalendarDays, ChevronRight, LogOut } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { MODULOS } from '../modulos'
 
@@ -18,7 +18,12 @@ export default function Mais() {
         ))}
       </div>
       <h2 className="mt-6 mb-2 px-1 text-sm text-slate-500">Configurações</h2>
-      <div className="overflow-hidden rounded-2xl border border-borda bg-cartao">
+      <div className="divide-y divide-borda overflow-hidden rounded-2xl border border-borda bg-cartao">
+        <Link to="/notificacoes" className="flex items-center gap-3 px-4 py-3.5">
+          <Bell size={20} className="text-slate-400" />
+          <span className="flex-1">Notificações</span>
+          <ChevronRight size={18} className="text-slate-600" />
+        </Link>
         <Link to="/agendas" className="flex items-center gap-3 px-4 py-3.5">
           <CalendarDays size={20} className="text-slate-400" />
           <span className="flex-1">Agendas</span>

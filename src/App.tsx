@@ -18,6 +18,7 @@ import Compras from './pages/Compras'
 import Objetivos from './pages/Objetivos'
 import ObjetivoDetalhe from './pages/ObjetivoDetalhe'
 import Lifestyle from './pages/Lifestyle'
+import Notificacoes from './pages/Notificacoes'
 
 export default function App() {
   const [sessao, setSessao] = useState<Session | null | undefined>(undefined)
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/objetivos" element={<Objetivos />} />
           <Route path="/objetivos/:id" element={<ObjetivoDetalhe />} />
           <Route path="/lifestyle" element={<Lifestyle />} />
+          <Route path="/notificacoes" element={<Notificacoes />} />
           <Route path="/mais" element={<Mais />} />
           <Route path="*" element={<Home />} />
         </Route>

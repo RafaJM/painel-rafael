@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { CalendarDays, LayoutGrid, LogOut } from 'lucide-react'
+import { Bell, CalendarDays, LayoutGrid, LogOut } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { MODULOS } from '../modulos'
 
@@ -26,16 +26,23 @@ export default function Layout() {
             {m.nome}
           </NavLink>
         ))}
-        <NavLink
-          to="/agendas"
-          className={({ isActive }) =>
-            `mt-auto flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
-              isActive ? 'bg-cartao text-white' : 'text-slate-500 hover:text-slate-300'
-            }`
-          }
-        >
-          <CalendarDays size={18} /> Agendas
-        </NavLink>
+        <div className="mt-auto" />
+        {[
+          { to: '/notificacoes', nome: 'Notificações', Icone: Bell },
+          { to: '/agendas', nome: 'Agendas', Icone: CalendarDays },
+        ].map(({ to, nome, Icone }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${
+                isActive ? 'bg-cartao text-white' : 'text-slate-500 hover:text-slate-300'
+              }`
+            }
+          >
+            <Icone size={18} /> {nome}
+          </NavLink>
+        ))}
         <button
           onClick={() => supabase.auth.signOut()}
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-500 hover:text-slate-300"

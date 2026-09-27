@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from './supabase'
-import type { Evento } from '../../api/agenda'
+import type { Evento } from '../../api/_lib/ical'
 
 export type { Evento }
 
