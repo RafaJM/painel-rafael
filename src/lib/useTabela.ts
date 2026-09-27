@@ -16,33 +16,50 @@ function mesclar<T extends ComId>(linhas: T[], nova: T): T[] {
  * (Supabase Realtime). Também recarrega ao reconectar e quando o app
  * volta para o primeiro plano, que é quando o celular costuma perder o socket.
  */
-export function useTabela<T extends ComId>(tabela: string) {
+export function useTabela<T extends ComId>(
+  tabela: string,
+  filtro?: { coluna: string; valor: string },
+) {
   const [linhas, setLinhas] = useState<T[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
+  const coluna = filtro?.coluna
+  const valor = filtro?.valor
 
   const recarregar = useCallback(async () => {
-    const { data, error } = await supabase.from(tabela).select('*')
+    let consulta = supabase.from(tabela).select('*')
+    if (coluna && valor !== undefined) consulta = consulta.eq(coluna, valor)
+    const { data, error } = await consulta
     if (error) setErro(error.message)
     else {
       setErro(null)
       setLinhas(data as T[])
     }
     setCarregando(false)
-  }, [tabela])
+  }, [tabela, coluna, valor])
 
   useEffect(() => {
+    setCarregando(true)
     recarregar()
     const canal = supabase
       .channel(`${tabela}-${crypto.randomUUID()}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: tabela }, (p) => {
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: tabela,
+          ...(coluna && valor !== undefined ? { filter: `${coluna}=eq.${valor}` } : {}),
+        },
+        (p) => {
         if (p.eventType === 'DELETE') {
           const id = (p.old as ComId).id
           setLinhas((ls) => ls.filter((l) => l.id !== id))
         } else {
           setLinhas((ls) => mesclar(ls, p.new as T))
         }
-      })
+        },
+      )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') recarregar()
       })
@@ -55,7 +72,7 @@ export function useTabela<T extends ComId>(tabela: string) {
       supabase.removeChannel(canal)
       document.removeEventListener('visibilitychange', aoVoltar)
     }
-  }, [tabela, recarregar])
+  }, [tabela, coluna, valor, recarregar])
 
   const inserir = useCallback(
     async (dados: Partial<T>) => {
@@ -107,5 +124,5 @@ export function useTabela<T extends ComId>(tabela: string) {
     [tabela, recarregar],
   )
 
-  return { linhas, carregando, erro, inserir, atualizar, remover }
+  return { linhas, carregando, erro, recarregar, inserir, atualizar, remover }
 }

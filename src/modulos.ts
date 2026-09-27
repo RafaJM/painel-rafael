@@ -24,7 +24,7 @@ export const MODULOS: Modulo[] = [
   { rota: '/trabalho', nome: 'Trabalho Formal', icone: Briefcase, pronto: true },
   { rota: '/pessoal', nome: 'Trabalho Pessoal', icone: Rocket, pronto: true },
   { rota: '/estudos', nome: 'Estudos', icone: GraduationCap, pronto: true },
-  { rota: '/rotina', nome: 'Rotina Fixa', icone: Repeat, pronto: false },
+  { rota: '/rotina', nome: 'Rotina Fixa', icone: Repeat, pronto: true },
   { rota: '/sono', nome: 'Sono', icone: Moon, pronto: false },
   { rota: '/compras', nome: 'Lista de Compras', icone: ShoppingCart, pronto: false },
   { rota: '/objetivos', nome: 'Objetivos', icone: Target, pronto: false },

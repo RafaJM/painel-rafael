@@ -5,6 +5,7 @@
   --color-cartao: #121b2e;
   --color-borda: #1f2a40;
   --color-destaque: #2dd4bf;
+  --color-grafico: #0d9488; /* barras (validado contra o fundo escuro) */
 }
 
 :root {

@@ -10,6 +10,7 @@ import Home from './pages/Home'
 import PainelTarefas from './pages/PainelTarefas'
 import Mais from './pages/Mais'
 import EmBreve from './pages/EmBreve'
+import Rotina from './pages/Rotina'
 
 export default function App() {
   const [sessao, setSessao] = useState<Session | null | undefined>(undefined)
@@ -43,6 +44,7 @@ export default function App() {
           {MODULOS.filter((m) => !m.pronto).map((m) => (
             <Route key={m.rota} path={m.rota} element={<EmBreve nome={m.nome} />} />
           ))}
+          <Route path="/rotina" element={<Rotina />} />
           <Route path="/mais" element={<Mais />} />
           <Route path="*" element={<Home />} />
         </Route>

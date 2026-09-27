@@ -22,6 +22,48 @@ function paraUTC(iso: string): Date {
   return new Date(Date.UTC(a, m - 1, d))
 }
 
+function paraISO(d: Date): string {
+  return d.toISOString().slice(0, 10)
+}
+
+export function somarDias(iso: string, n: number): string {
+  const d = paraUTC(iso)
+  d.setUTCDate(d.getUTCDate() + n)
+  return paraISO(d)
+}
+
+/** 0 = domingo … 6 = sábado */
+export function diaSemana(iso: string): number {
+  return paraUTC(iso).getUTCDay()
+}
+
+/** Segunda-feira da semana de `iso`. */
+export function inicioSemana(iso: string): string {
+  return somarDias(iso, -((diaSemana(iso) + 6) % 7))
+}
+
+export function inicioMes(iso: string): string {
+  return iso.slice(0, 8) + '01'
+}
+
+export function somarMeses(iso: string, n: number): string {
+  const d = paraUTC(inicioMes(iso))
+  d.setUTCMonth(d.getUTCMonth() + n)
+  return paraISO(d)
+}
+
+export function nomeMes(iso: string, formato: 'short' | 'long' = 'long'): string {
+  return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC', month: formato })
+    .format(paraUTC(iso))
+    .replace('.', '')
+}
+
+export function diaSemanaCurto(iso: string): string {
+  return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC', weekday: 'short' })
+    .format(paraUTC(iso))
+    .replace('.', '')
+}
+
 export function diasAte(iso: string, base = hojeISO()): number {
   return Math.round((paraUTC(iso).getTime() - paraUTC(base).getTime()) / 86_400_000)
 }

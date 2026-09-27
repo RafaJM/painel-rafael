@@ -1,7 +1,12 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarDays, CircleCheck, Circle } from 'lucide-react'
 import { useTabela } from '../lib/useTabela'
-import { dataPorExtenso, diaDe, hojeISO, prazoRelativo, saudacao } from '../lib/datas'
+import { useHoje } from '../lib/useHoje'
+import { dataPorExtenso, diaDe, prazoRelativo, saudacao } from '../lib/datas'
+import { agrupar } from '../lib/graficos'
+import { sincronizarRotina, useSerieRotina, type RegistroHabito } from '../lib/rotina'
+import MiniBarras from '../components/MiniBarras'
 import { PAINEIS, prioridadesDoDia, resumo, type ItemPrioridade, type Tarefa } from '../lib/tarefas'
 import BarraProgresso from '../components/BarraProgresso'
 
@@ -14,7 +19,15 @@ export default function Home() {
     useTabela<Tarefa>('pessoal_tarefas'),
     useTabela<Tarefa>('estudos_tarefas'),
   ]
-  const hoje = hojeISO()
+  const hoje = useHoje()
+  const registrosHoje = useTabela<RegistroHabito>('habito_registros', { coluna: 'data', valor: hoje })
+  const serieRotina = useSerieRotina(hoje, hoje, registrosHoje.linhas)
+  const rotina7 = agrupar(serieRotina, 'dia', hoje).slice(-7)
+  const rotinaHoje = rotina7[rotina7.length - 1]
+
+  useEffect(() => {
+    sincronizarRotina(hoje)
+  }, [hoje])
 
   const itens: ItemPrioridade[] = PAINEIS.flatMap((painel, i) =>
     fontes[i].linhas.map((tarefa) => ({ painel, tarefa })),
@@ -81,6 +94,17 @@ export default function Home() {
           </p>
         )}
       </section>
+
+      <Link to="/rotina" className="block rounded-2xl border border-borda bg-cartao p-4">
+        <div className="mb-3 flex items-baseline justify-between">
+          <span className="font-semibold">Rotina de hoje</span>
+          <span className="text-sm tabular-nums text-slate-300">
+            {rotinaHoje.pct === null ? '—' : `${rotinaHoje.feitos}/${rotinaHoje.previstos} · ${rotinaHoje.pct}%`}
+          </span>
+        </div>
+        <MiniBarras barras={rotina7} />
+        <p className="mt-1.5 text-xs text-slate-500">Últimos 7 dias</p>
+      </Link>
 
       <section className="rounded-2xl border border-dashed border-borda p-4 text-sm text-slate-500">
         <div className="flex items-center gap-2">
