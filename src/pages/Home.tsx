@@ -8,7 +8,13 @@ import { agrupar } from '../lib/graficos'
 import { sincronizarRotina, useSerieRotina, type RegistroHabito } from '../lib/rotina'
 import MiniBarras from '../components/MiniBarras'
 import AgendaDoDia from '../components/AgendaDoDia'
-import { CartaoErros, CartaoSono } from '../components/CartoesHome'
+import {
+  CartaoCompras,
+  CartaoErros,
+  CartaoLifestyle,
+  CartaoObjetivos,
+  CartaoSono,
+} from '../components/CartoesHome'
 import { PAINEIS, prioridadesDoDia, resumo, type ItemPrioridade, type Tarefa } from '../lib/tarefas'
 import BarraProgresso from '../components/BarraProgresso'
 
@@ -113,7 +119,11 @@ export default function Home() {
       <section className="grid gap-3 sm:grid-cols-2">
         <CartaoSono hoje={hoje} />
         <CartaoErros hoje={hoje} />
+        <CartaoLifestyle hoje={hoje} />
+        <CartaoCompras hoje={hoje} />
       </section>
+
+      <CartaoObjetivos />
 
       <section className="grid gap-3 sm:grid-cols-3">
         {PAINEIS.map((painel, i) => {

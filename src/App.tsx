@@ -14,6 +14,10 @@ import Rotina from './pages/Rotina'
 import Agendas from './pages/Agendas'
 import Sono from './pages/Sono'
 import Erros from './pages/Erros'
+import Compras from './pages/Compras'
+import Objetivos from './pages/Objetivos'
+import ObjetivoDetalhe from './pages/ObjetivoDetalhe'
+import Lifestyle from './pages/Lifestyle'
 
 export default function App() {
   const [sessao, setSessao] = useState<Session | null | undefined>(undefined)
@@ -51,6 +55,10 @@ export default function App() {
           <Route path="/agendas" element={<Agendas />} />
           <Route path="/sono" element={<Sono />} />
           <Route path="/erros" element={<Erros />} />
+          <Route path="/compras" element={<Compras />} />
+          <Route path="/objetivos" element={<Objetivos />} />
+          <Route path="/objetivos/:id" element={<ObjetivoDetalhe />} />
+          <Route path="/lifestyle" element={<Lifestyle />} />
           <Route path="/mais" element={<Mais />} />
           <Route path="*" element={<Home />} />
         </Route>

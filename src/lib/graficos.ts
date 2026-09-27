@@ -106,6 +106,7 @@ export interface BarraMedia {
   rotulo: string
   detalhe: string
   n: number // quantos registros no período
+  total: number // soma dos valores
   media: number | null
 }
 
@@ -122,6 +123,22 @@ export function agruparMedia(pontos: PontoValor[], janela: Janela, hoje: string)
   }
   return chaves.map((chave) => {
     const { total, n } = soma.get(chave)!
-    return { chave, ...descrever(chave, janela, hoje), n, media: n ? total / n : null }
+    return { chave, ...descrever(chave, janela, hoje), n, total, media: n ? total / n : null }
   })
+}
+
+/** Último valor registrado em cada período (ex.: % de um objetivo ao fim da semana). */
+export function agruparUltimo(pontos: PontoValor[], janela: Janela, hoje: string) {
+  const chaves = periodos(janela, hoje)
+  const ultimo = new Map<string, PontoValor>()
+  for (const p of pontos) {
+    const k = chaveDe(p.data, janela)
+    const atual = ultimo.get(k)
+    if (!atual || p.data > atual.data) ultimo.set(k, p)
+  }
+  return chaves.map((chave) => ({
+    chave,
+    ...descrever(chave, janela, hoje),
+    valor: ultimo.get(chave)?.valor ?? null,
+  }))
 }

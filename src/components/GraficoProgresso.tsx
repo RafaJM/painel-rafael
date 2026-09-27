@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { agrupar, type PontoDia } from '../lib/graficos'
+import { agrupar, type Janela, type PontoDia } from '../lib/graficos'
 import GraficoJanelas from './GraficoJanelas'
 
 /**
@@ -13,6 +13,7 @@ export default function GraficoProgresso({
   hoje,
   extra,
   complemento = (feitos, previstos) => `${feitos} de ${previstos}`,
+  janelas,
 }: {
   titulo: string
   subtitulo?: string
@@ -20,12 +21,14 @@ export default function GraficoProgresso({
   hoje: string
   extra?: ReactNode
   complemento?: (feitos: number, previstos: number) => string
+  janelas?: Janela[]
 }) {
   return (
     <GraficoJanelas
       titulo={titulo}
       subtitulo={subtitulo}
       extra={extra}
+      janelas={janelas}
       maximo={100}
       guias={[50, 100]}
       formatar={(v) => `${v}%`}

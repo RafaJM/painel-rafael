@@ -22,24 +22,27 @@ export default function GraficoJanelas({
   formatar,
   resumo,
   extra,
+  janelas = JANELAS.map((j) => j.valor),
 }: {
   titulo: string
   subtitulo?: string
   calcular: (janela: Janela) => BarraGrafico[]
-  maximo: number
+  maximo: number | ((barras: BarraGrafico[]) => number)
   guias: number[]
   formatar: (valor: number) => string
   resumo?: (janela: Janela, barras: BarraGrafico[]) => ReactNode
   extra?: ReactNode
+  janelas?: Janela[]
 }) {
-  const [janela, setJanela] = useState<Janela>('dia')
+  const [janela, setJanela] = useState<Janela>(janelas[0])
   const [selecionada, setSelecionada] = useState<number | null>(null)
   const barras = calcular(janela)
+  const teto = typeof maximo === 'function' ? maximo(barras) : maximo
 
   const iFoco = selecionada ?? barras.length - 1
   const foco = barras[iFoco]
   const rotularAlternado = janela !== 'dia' || barras.length > 10
-  const altura = (v: number) => `${Math.min(Math.max((v / maximo) * 100, 2), 100)}%`
+  const altura = (v: number) => `${Math.min(Math.max((v / teto) * 100, 2), 100)}%`
 
   return (
     <section className="rounded-2xl border border-borda bg-cartao p-4">
@@ -49,7 +52,7 @@ export default function GraficoJanelas({
           {subtitulo && <p className="text-xs text-slate-500">{subtitulo}</p>}
         </div>
         <div className="flex shrink-0 rounded-full bg-fundo p-0.5 text-xs" role="tablist">
-          {JANELAS.map((j) => (
+          {JANELAS.filter((j) => janelas.includes(j.valor)).map((j) => (
             <button
               key={j.valor}
               role="tab"
@@ -83,7 +86,7 @@ export default function GraficoJanelas({
           <div
             key={v}
             className="absolute inset-x-0 border-t border-dashed border-borda"
-            style={{ bottom: `${(v / maximo) * 100}%` }}
+            style={{ bottom: `${(v / teto) * 100}%` }}
           >
             <span className="absolute -top-2 right-0 bg-cartao pl-1 text-[10px] leading-none text-slate-500">
               {formatar(v)}
